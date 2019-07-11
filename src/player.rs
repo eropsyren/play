@@ -13,6 +13,8 @@ impl Player {
             rodio::default_output_device().expect("Error: unable to obtain default outut device");
         let sink = Sink::new(&device);
 
+        sink.pause();
+
         Player { sink }
     }
 
