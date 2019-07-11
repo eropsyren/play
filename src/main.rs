@@ -1,6 +1,6 @@
 extern crate play;
 
-use play::{Player};
+use play::Player;
 
 fn main() {
     let player = Player::new();
