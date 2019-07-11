@@ -2,6 +2,8 @@ use clap::{self, App, Arg};
 use play::{Audio, InputHandler, Player, Screen};
 use termion::event::Key;
 
+const LOOP_SLEEP_MS: u64 = 50;
+
 fn main() {
     let matches = App::new("play")
         .version(clap::crate_version!())
@@ -66,6 +68,6 @@ fn run(audios: Vec<Audio>) {
             }
         }
 
-        std::thread::sleep(std::time::Duration::from_millis(50));
+        std::thread::sleep(std::time::Duration::from_millis(LOOP_SLEEP_MS));
     }
 }
