@@ -1,6 +1,7 @@
 extern crate rodio;
 
 use rodio::Sink;
+use crate::Audio;
 
 pub struct Player {
     sink: Sink,
@@ -12,12 +13,11 @@ impl Player {
             rodio::default_output_device().expect("Error: unable to obtain default outut device");
         let sink = Sink::new(&device);
 
-        // Add a dummy source of the sake of the example.
-        let source = rodio::source::SineWave::new(440);
-
-        sink.append(source);
-
         Player { sink }
+    }
+
+    pub fn load(&self, audio: &Audio) {
+        self.sink.append(audio.source());
     }
 
     pub fn is_empty(&self) -> bool {
