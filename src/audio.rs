@@ -28,7 +28,7 @@ impl Audio {
         }
     }
 
-    pub fn source(&self) -> Decoder<BufReader<File>>{
+    pub fn source(&self) -> Decoder<BufReader<File>> {
         match File::open(self.path.as_ref()) {
             Ok(file) => match Decoder::new(BufReader::new(file)) {
                 Ok(source) => source,
