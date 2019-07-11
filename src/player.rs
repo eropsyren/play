@@ -1,7 +1,7 @@
 extern crate rodio;
 
-use rodio::Sink;
 use crate::Audio;
+use rodio::Sink;
 
 pub struct Player {
     sink: Sink,
