@@ -1,4 +1,4 @@
-use rodio::{Decoder, Source};
+use rodio::Decoder;
 use std::fs::File;
 use std::io::BufReader;
 use std::path::Path;
@@ -25,6 +25,16 @@ impl Audio {
                 None => None,
             },
             None => unreachable!(),
+        }
+    }
+
+    pub fn source(&self) -> Decoder<BufReader<File>>{
+        match File::open(self.path.as_ref()) {
+            Ok(file) => match Decoder::new(BufReader::new(file)) {
+                Ok(source) => source,
+                Err(_) => unreachable!(),
+            },
+            Err(_) => unreachable!(),
         }
     }
 }
