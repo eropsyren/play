@@ -3,12 +3,12 @@ use std::fs::File;
 use std::io::BufReader;
 use std::path::Path;
 
-pub struct Song {
+pub struct Audio {
     path: Box<Path>,
-    title: String,
+    name: String,
 }
 
-impl Song {
+impl Audio {
     pub fn new(str_path: &str) -> Option<Self> {
         let path = Path::new(str_path);
 
@@ -18,9 +18,9 @@ impl Song {
 
         match path.file_name() {
             Some(file_name) => match file_name.to_str() {
-                Some(file_name) => Some(Song {
+                Some(file_name) => Some(Audio {
                     path: Box::from(path),
-                    title: String::from(file_name),
+                    name: String::from(file_name),
                 }),
                 None => None,
             },

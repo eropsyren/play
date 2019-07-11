@@ -1,5 +1,5 @@
+mod audio;
 mod player;
-mod song;
 
+pub use audio::Audio;
 pub use player::Player;
-pub use song::Song;
