@@ -20,6 +20,14 @@ impl Player {
         self.sink.append(audio.source());
     }
 
+    pub fn play(&self) {
+        self.sink.play();
+    }
+
+    pub fn pause(&self) {
+        self.sink.pause();
+    }
+
     pub fn is_empty(&self) -> bool {
         self.sink.empty()
     }
