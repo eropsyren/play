@@ -7,32 +7,46 @@ fn main() {
         .author(clap::crate_authors!())
         .about("audio player")
         .arg(
-            Arg::with_name("audio")
+            Arg::with_name("audios")
                 .short("a")
-                .long("audio")
-                .value_name("FILE")
-                .help("plays the aduio FILE")
-                .takes_value(true),
+                .long("audios")
+                .value_name("FILEs")
+                .help("plays the passed audio FILEs")
+                .takes_value(true)
+                .multiple(true),
         )
         .get_matches();
 
-    let audio = matches.value_of("audio");
+    let audio_paths = matches.values_of("audios");
 
-    if audio.is_some() {
-        let path_to_audio = audio.unwrap();
-        let player = Player::new();
-        let audio = Audio::new(path_to_audio);
+    if audio_paths.is_some() {
+        let audios: Vec<Audio> = audio_paths
+            .unwrap()
+            .filter_map(|path| {
+                let audio = Audio::new(path);
 
-        match audio {
-            Some(audio) => {
-                player.load(&audio);
-                player.play();
-            }
-            None => eprintln!("error reading file: {}", path_to_audio),
-        }
+                match audio {
+                    Some(_) => (),
+                    None => eprintln!("error reading file: {}", path),
+                };
 
-        while !player.is_empty() {
-            std::thread::sleep(std::time::Duration::from_millis(50));
-        }
+                audio
+            })
+            .collect();
+
+        run(audios);
+    }
+}
+
+fn run(audios: Vec<Audio>) {
+    let player = Player::new();
+    player.play();
+
+    for audio in &audios {
+        player.load(audio);
+    }
+
+    while !player.is_empty() {
+        std::thread::sleep(std::time::Duration::from_millis(50));
     }
 }
