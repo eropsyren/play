@@ -1,5 +1,5 @@
+use dirs;
 use rodio::Decoder;
-use std::env;
 use std::fs::File;
 use std::io::BufReader;
 use std::path::Path;
@@ -11,7 +11,7 @@ pub struct Audio {
 
 impl Audio {
     pub fn new(path: &str) -> Option<Self> {
-        let path = match env::home_dir() {
+        let path = match dirs::home_dir() {
             Some(path_buf) => match path_buf.to_str() {
                 Some(dir) => path.replace("~", dir),
                 None => String::from(path),
