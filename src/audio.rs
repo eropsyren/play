@@ -1,4 +1,5 @@
 use rodio::Decoder;
+use std::env;
 use std::fs::File;
 use std::io::BufReader;
 use std::path::Path;
@@ -9,8 +10,15 @@ pub struct Audio {
 }
 
 impl Audio {
-    pub fn new(str_path: &str) -> Option<Self> {
-        let path = Path::new(str_path);
+    pub fn new(path: &str) -> Option<Self> {
+        let path = match env::home_dir() {
+            Some(path_buf) => match path_buf.to_str() {
+                Some(dir) => path.replace("~", dir),
+                None => String::from(path),
+            },
+            None => String::from(path),
+        };
+        let path = Path::new(&path);
 
         if !is_audio(&Box::from(path)) {
             return None;
