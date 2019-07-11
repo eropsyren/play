@@ -20,4 +20,8 @@ impl Player {
             sink,
         }
     }
+
+    pub fn is_empty(&self) -> bool {
+        self.sink.empty()
+    }
 }
