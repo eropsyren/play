@@ -1,5 +1,3 @@
-extern crate rodio;
-
 use crate::Audio;
 use rodio::Sink;
 
