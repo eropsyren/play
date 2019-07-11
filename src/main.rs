@@ -1,5 +1,5 @@
 use clap::{self, App, Arg};
-use play::{Audio, InputHandler, Player};
+use play::{Audio, InputHandler, Player, Screen};
 use termion::event::Key;
 
 fn main() {
@@ -42,6 +42,10 @@ fn main() {
 fn run(audios: Vec<Audio>) {
     let player = Player::new();
     let input_handler = InputHandler::new();
+    let mut screen = Screen::new();
+
+    screen.clear();
+    screen.hide_cursor();
 
     for audio in &audios {
         player.load(audio);
