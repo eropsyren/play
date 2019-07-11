@@ -1,5 +1,6 @@
 use clap::{self, App, Arg};
-use play::{Audio, Player};
+use play::{Audio, InputHandler, Player};
+use termion::event::Key;
 
 fn main() {
     let matches = App::new("play")
@@ -40,13 +41,27 @@ fn main() {
 
 fn run(audios: Vec<Audio>) {
     let player = Player::new();
-    player.play();
+    let input_handler = InputHandler::new();
 
     for audio in &audios {
         player.load(audio);
     }
 
-    while !player.is_empty() {
+    'main: loop {
+        for key in input_handler.keys() {
+            match key {
+                Key::Char('q') => break 'main,
+                Key::Char(' ') => {
+                    if player.is_paused() {
+                        player.play();
+                    } else {
+                        player.pause();
+                    }
+                }
+                _ => (),
+            }
+        }
+
         std::thread::sleep(std::time::Duration::from_millis(50));
     }
 }
