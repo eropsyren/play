@@ -16,6 +16,10 @@ impl Player {
         Player { sink }
     }
 
+    pub fn is_paused(&self) -> bool {
+        self.sink.is_paused()
+    }
+
     pub fn load(&self, audio: &Audio) {
         self.sink.append(audio.source());
     }
