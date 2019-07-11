@@ -1,5 +1,3 @@
-extern crate rodio;
-
 use crate::Audio;
 use rodio::Sink;
 
@@ -12,6 +10,8 @@ impl Player {
         let device =
             rodio::default_output_device().expect("Error: unable to obtain default outut device");
         let sink = Sink::new(&device);
+
+        sink.pause();
 
         Player { sink }
     }
