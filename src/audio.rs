@@ -49,10 +49,7 @@ impl Audio {
 
 fn is_audio(path: &Box<Path>) -> bool {
     match File::open(path) {
-        Ok(file) => match Decoder::new(BufReader::new(file)) {
-            Ok(_) => true,
-            Err(_) => false,
-        },
+        Ok(file) => Decoder::new(BufReader::new(file)).is_ok(),
         Err(_) => false,
     }
 }
