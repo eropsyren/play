@@ -36,6 +36,10 @@ impl Audio {
         }
     }
 
+    pub fn name(&self) -> &str {
+        &self.name
+    }
+
     pub fn source(&self) -> Decoder<BufReader<File>> {
         match File::open(self.path.as_ref()) {
             Ok(file) => match Decoder::new(BufReader::new(file)) {
@@ -49,10 +53,7 @@ impl Audio {
 
 fn is_audio(path: &Box<Path>) -> bool {
     match File::open(path) {
-        Ok(file) => match Decoder::new(BufReader::new(file)) {
-            Ok(_) => true,
-            Err(_) => false,
-        },
+        Ok(file) => Decoder::new(BufReader::new(file)).is_ok(),
         Err(_) => false,
     }
 }
