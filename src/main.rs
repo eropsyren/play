@@ -1,5 +1,5 @@
 use clap::{self, App, Arg};
-use play::{Audio, InputHandler, Player, Screen};
+use play::{Audio, InputHandler, Player, Screen, State};
 use termion::event::Key;
 
 const LOOP_SLEEP_MS: u64 = 50;
@@ -42,21 +42,23 @@ fn main() {
 }
 
 fn run(audios: Vec<Audio>) {
-    let player = Player::new();
+    let mut player = Player::new();
     let input_handler = InputHandler::new();
     let mut screen = Screen::new();
+    let mut state = State::new(audios, 0, 0, 10);
 
     screen.clear();
     screen.hide_cursor();
 
-    for audio in &audios {
-        player.load(audio);
-    }
+    player.load(state.loaded());
 
     'main: loop {
         for key in input_handler.keys() {
             match key {
-                Key::Char('q') => break 'main,
+                Key::Char('q') => {
+                    screen.clear();
+                    break 'main;
+                }
                 Key::Char(' ') => {
                     if player.is_paused() {
                         player.play();
@@ -64,9 +66,17 @@ fn run(audios: Vec<Audio>) {
                         player.pause();
                     }
                 }
+                Key::Up => state.prev(),
+                Key::Down => state.next(),
+                Key::Char('\n') => {
+                    state.set_loaded_to_pointed();
+                    player.load(state.loaded());
+                },
                 _ => (),
             }
         }
+
+        screen.render(&state);
 
         std::thread::sleep(std::time::Duration::from_millis(LOOP_SLEEP_MS));
     }
