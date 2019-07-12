@@ -1,6 +1,10 @@
+use crate::State;
 use std::io::{self, Stdout};
 use termion::raw::{IntoRawMode, RawTerminal};
 use tui::backend::TermionBackend;
+use tui::layout::{Alignment, Constraint, Direction, Layout};
+use tui::style::{Color, Style};
+use tui::widgets::{Block, Borders, Paragraph, Text, Widget};
 use tui::Terminal;
 
 pub struct Screen {
@@ -29,9 +33,45 @@ impl Screen {
         self.term.hide_cursor().expect("unable to hide cursor");
     }
 
-    pub fn render(&mut self) {
+    pub fn render(&mut self, state: &State) {
         self.term
-            .draw(|_f| {})
+            .draw(|mut f| {
+                let chunks = Layout::default()
+                    .direction(Direction::Vertical)
+                    .margin(1)
+                    .constraints([Constraint::Percentage(20), Constraint::Percentage(80)].as_ref())
+                    .split(f.size());
+
+                let text = [Text::styled(
+                    format!("currently loaded: {}\n", state.loaded().name()),
+                    Style::default().fg(Color::Green),
+                )];
+
+                Paragraph::new(text.iter())
+                    .block(Block::default().borders(Borders::NONE))
+                    .alignment(Alignment::Left)
+                    .render(&mut f, chunks[0]);
+
+                let text: Vec<Text> = state
+                    .audios()
+                    .iter()
+                    .enumerate()
+                    .map(|(idx, audio)| {
+                        let name = format!("{}\n", audio.name());
+
+                        if idx == state.pointed() {
+                            Text::styled(name, Style::default().fg(Color::Green))
+                        } else {
+                            Text::raw(name)
+                        }
+                    })
+                    .collect();
+
+                Paragraph::new(text.iter())
+                    .block(Block::default().borders(Borders::NONE))
+                    .alignment(Alignment::Left)
+                    .render(&mut f, chunks[1]);
+            })
             .expect("error rendering application");
     }
 }
