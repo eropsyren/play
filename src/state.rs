@@ -6,6 +6,7 @@ pub struct State {
     loaded: usize,
     min: usize,
     max: usize,
+    clean: bool,
 }
 
 impl State {
@@ -22,7 +23,16 @@ impl State {
             loaded,
             min: 0,
             max,
+            clean: false,
         }
+    }
+
+    pub fn is_clean(&self) -> bool {
+        self.clean
+    }
+
+    pub fn clean(&mut self) {
+        self.clean = true;
     }
 
     pub fn audios(&self) -> &[Audio] {
@@ -34,6 +44,7 @@ impl State {
     }
 
     pub fn set_loaded_to_pointed(&mut self) {
+        self.clean = false;
         self.loaded = self.pointed;
     }
 
@@ -42,6 +53,8 @@ impl State {
     }
 
     pub fn prev(&mut self) {
+        self.clean = false;
+
         if self.pointed == self.min {
             if self.min > 0 {
                 self.min -= 1;
@@ -54,6 +67,8 @@ impl State {
     }
 
     pub fn next(&mut self) {
+        self.clean = false;
+
         if self.pointed == self.max - 1 {
             if self.max < self.audios.len() {
                 self.min += 1;

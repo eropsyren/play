@@ -1,6 +1,6 @@
 use crate::Audio;
-use rodio::{Sink, Device};
 use rodio::source::Source;
+use rodio::{Device, Sink};
 
 pub struct Player {
     device: Device,
@@ -23,15 +23,19 @@ impl Player {
     }
 
     pub fn load(&mut self, audio: &Audio) {
-        let is_paused = self.is_paused();
-        
-        self.sink = Sink::new(&self.device);
+        if self.sink.empty() {
+            self.sink.append(audio.source())
+        } else {
+            let is_paused = self.is_paused();
 
-        if is_paused {
-            self.sink.pause();
+            self.sink = Sink::new(&self.device);
+
+            if is_paused {
+                self.sink.pause();
+            }
+
+            self.sink.append(audio.source());
         }
-
-        self.sink.append(audio.source());
     }
 
     pub fn play(&self) {
