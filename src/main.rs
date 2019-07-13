@@ -76,7 +76,10 @@ fn run(audios: Vec<Audio>) {
             }
         }
 
-        screen.render(&state);
+        if !state.is_clean() {
+            screen.render(&state);
+            state.clean();
+        }
 
         std::thread::sleep(std::time::Duration::from_millis(LOOP_SLEEP_MS));
     }
