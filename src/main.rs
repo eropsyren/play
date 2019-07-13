@@ -1,7 +1,6 @@
 use clap::{self, App, Arg};
 use play::{Audio, InputHandler, Player, Screen, State};
 use std::fs;
-use std::io::Error;
 use termion::event::Key;
 
 const LOOP_SLEEP_MS: u64 = 50;
