@@ -1,5 +1,7 @@
 use clap::{self, App, Arg};
 use play::{Audio, InputHandler, Player, Screen, State};
+use std::fs;
+use std::io::Error;
 use termion::event::Key;
 
 const LOOP_SLEEP_MS: u64 = 50;
@@ -16,11 +18,22 @@ fn main() {
                 .value_name("FILEs")
                 .help("plays the passed audio FILEs")
                 .takes_value(true)
-                .multiple(true),
+                .multiple(true)
+                .group("main"),
+        )
+        .arg(
+            Arg::with_name("read")
+                .short("r")
+                .long("read")
+                .value_name("DIR")
+                .help("reads a DIR as a list of audios")
+                .takes_value(true)
+                .group("main"),
         )
         .get_matches();
 
     let audio_paths = matches.values_of("audios");
+    let dir = matches.value_of("read");
 
     if audio_paths.is_some() {
         let audios: Vec<Audio> = audio_paths
@@ -36,6 +49,27 @@ fn main() {
                 audio
             })
             .collect();
+
+        run(audios);
+    } else if dir.is_some() {
+        let dir = dir.unwrap();
+        let entries = fs::read_dir(dir);
+
+        let audios: Vec<Audio> = match entries {
+            Ok(entries) => entries
+                .filter_map(|entry| entry.ok())
+                .map(|entry| entry.path())
+                .filter_map(|path| match path.to_str() {
+                    Some(val) => Some(String::from(val)),
+                    None => None,
+                })
+                .filter_map(|path| Audio::new(&path))
+                .collect(),
+            Err(_) => {
+                eprintln!("error reading directory: {}", dir);
+                return;
+            }
+        };
 
         run(audios);
     }
@@ -71,7 +105,7 @@ fn run(audios: Vec<Audio>) {
                 Key::Char('\n') => {
                     state.set_loaded_to_pointed();
                     player.load(state.loaded());
-                },
+                }
                 _ => (),
             }
         }
