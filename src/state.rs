@@ -27,6 +27,10 @@ impl State {
         }
     }
 
+    pub fn is_clean(&self) -> bool {
+        self.clean
+    }
+
     pub fn clean(&mut self) {
         self.clean = true;
     }
