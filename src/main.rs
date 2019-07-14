@@ -1,7 +1,8 @@
-use clap::{self, App, Arg};
+use clap::{self, App, Arg, SubCommand};
 use play::{Audio, InputHandler, Player, Screen, State};
 use std::fs;
 use termion::event::Key;
+use rodio;
 
 const LOOP_SLEEP_MS: u64 = 50;
 
@@ -29,10 +30,20 @@ fn main() {
                 .takes_value(true)
                 .group("main"),
         )
+        .subcommand(
+            SubCommand::with_name("devices")
+                .about("list all available audio devices")
+        )
         .get_matches();
 
     let audio_paths = matches.values_of("audios");
     let dir = matches.value_of("read");
+    
+    if let Some(_) = matches.subcommand_matches("devices") {
+        for device in rodio::devices() {
+            println!("name: {}", device.name());
+        }
+    }
 
     if audio_paths.is_some() {
         let audios: Vec<Audio> = audio_paths
