@@ -1,8 +1,8 @@
 use clap::{self, App, Arg, SubCommand};
 use play::{Audio, InputHandler, Player, Screen, State};
+use rodio;
 use std::fs;
 use termion::event::Key;
-use rodio;
 
 const LOOP_SLEEP_MS: u64 = 50;
 
@@ -30,24 +30,12 @@ fn main() {
                 .takes_value(true)
                 .group("main"),
         )
-        .subcommand(
-            SubCommand::with_name("devices")
-                .about("list all available audio devices")
-        )
+        .subcommand(SubCommand::with_name("devices").about("list all available audio devices"))
         .get_matches();
 
-    let audio_paths = matches.values_of("audios");
-    let dir = matches.value_of("read");
-    
-    if let Some(_) = matches.subcommand_matches("devices") {
-        for device in rodio::devices() {
-            println!("name: {}", device.name());
-        }
-    }
-
-    if audio_paths.is_some() {
+    // -a option
+    if let Some(audio_paths) = matches.values_of("audios") {
         let audios: Vec<Audio> = audio_paths
-            .unwrap()
             .filter_map(|path| {
                 let audio = Audio::new(path);
 
@@ -61,8 +49,10 @@ fn main() {
             .collect();
 
         run(audios);
-    } else if dir.is_some() {
-        let dir = dir.unwrap();
+    }
+
+    // -r option
+    if let Some(dir) = matches.value_of("read") {
         let entries = fs::read_dir(dir);
 
         let audios: Vec<Audio> = match entries {
@@ -82,6 +72,13 @@ fn main() {
         };
 
         run(audios);
+    }
+
+    // devices subcommand
+    if let Some(_) = matches.subcommand_matches("devices") {
+        for device in rodio::devices() {
+            println!("name: {}", device.name());
+        }
     }
 }
 
