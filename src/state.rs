@@ -27,6 +27,16 @@ impl State {
         }
     }
 
+    pub fn set_loaded_to_next(&mut self) {
+        self.clean = false;
+        
+        if self.loaded == self.audios.len() - 1 {
+            self.loaded = 0;
+        } else {
+            self.loaded += 1;
+        }
+    }
+
     pub fn is_clean(&self) -> bool {
         self.clean
     }
