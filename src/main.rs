@@ -96,7 +96,7 @@ fn run(audios: Vec<Audio>, is_loop: bool) {
     let input_handler = InputHandler::new();
     let mut screen = Screen::new();
     // Player defaults as paused
-    let mut state = State::new(audios, 0, 0, 10, true);
+    let mut state = State::new(audios, 0, 0, (screen.height() - 4) as usize, true);
 
     screen.clear();
     screen.hide_cursor();

@@ -1,5 +1,6 @@
 use crate::State;
 use std::io::{self, Stdout};
+use termion;
 use termion::raw::{IntoRawMode, RawTerminal};
 use tui::backend::TermionBackend;
 use tui::layout::{Alignment, Constraint, Direction, Layout};
@@ -25,6 +26,13 @@ impl Screen {
         Screen { term }
     }
 
+    pub fn height(&self) -> u16 {
+        match termion::terminal_size() {
+            Ok((_, height)) => height,
+            Err(_) => unreachable!(),
+        }
+    }
+
     pub fn clear(&mut self) {
         self.term.clear().expect("error clearing the screen");
     }
@@ -34,12 +42,14 @@ impl Screen {
     }
 
     pub fn render(&mut self, state: &State) {
+        let height = self.height();
+
         self.term
             .draw(|mut f| {
                 let chunks = Layout::default()
                     .direction(Direction::Vertical)
                     .margin(1)
-                    .constraints([Constraint::Percentage(20), Constraint::Percentage(80)].as_ref())
+                    .constraints([Constraint::Length(2), Constraint::Percentage(height - 2)].as_ref())
                     .split(f.size());
 
                 let player_symbol = if state.is_paused() { "||" } else { "|>" };
