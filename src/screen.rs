@@ -42,8 +42,13 @@ impl Screen {
                     .constraints([Constraint::Percentage(20), Constraint::Percentage(80)].as_ref())
                     .split(f.size());
 
+                let player_symbol = if state.is_paused() { "||" } else { "|>" };
                 let text = [Text::styled(
-                    format!("currently loaded: {}\n", state.loaded().name()),
+                    format!(
+                        "{} currently loaded: {}\n",
+                        player_symbol,
+                        state.loaded().name()
+                    ),
                     Style::default().fg(Color::Green),
                 )];
 
