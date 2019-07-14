@@ -35,7 +35,7 @@ fn main() {
                 .short("l")
                 .long("loop")
                 .help("automatically loops through all songs")
-                .takes_value(false)
+                .takes_value(false),
         )
         .subcommand(SubCommand::with_name("devices").about("list all available audio devices"))
         .get_matches();
@@ -95,7 +95,8 @@ fn run(audios: Vec<Audio>, is_loop: bool) {
     let mut player = Player::new();
     let input_handler = InputHandler::new();
     let mut screen = Screen::new();
-    let mut state = State::new(audios, 0, 0, 10);
+    // Player defaults as paused
+    let mut state = State::new(audios, 0, 0, (screen.height() - 4) as usize, true);
 
     screen.clear();
     screen.hide_cursor();
@@ -112,8 +113,10 @@ fn run(audios: Vec<Audio>, is_loop: bool) {
                 Key::Char(' ') => {
                     if player.is_paused() {
                         player.play();
+                        state.set_paused(false);
                     } else {
                         player.pause();
+                        state.set_paused(true);
                     }
                 }
                 Key::Up => state.prev(),
