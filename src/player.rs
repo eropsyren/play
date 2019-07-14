@@ -17,12 +17,16 @@ impl Player {
         Player { device, sink }
     }
 
+    pub fn is_empty(&self) -> bool {
+        self.sink.empty()
+    }
+
     pub fn is_paused(&self) -> bool {
         self.sink.is_paused()
     }
 
     pub fn load(&mut self, audio: &Audio) {
-        if self.sink.empty() {
+        if self.is_empty() {
             self.sink.append(audio.source())
         } else {
             let is_paused = self.is_paused();

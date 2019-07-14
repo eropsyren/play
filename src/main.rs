@@ -30,8 +30,17 @@ fn main() {
                 .takes_value(true)
                 .group("main"),
         )
+        .arg(
+            Arg::with_name("loop")
+                .short("l")
+                .long("loop")
+                .help("automatically loops through all songs")
+                .takes_value(false)
+        )
         .subcommand(SubCommand::with_name("devices").about("list all available audio devices"))
         .get_matches();
+
+    let is_loop = matches.is_present("loop");
 
     // -a option
     if let Some(audio_paths) = matches.values_of("audios") {
@@ -48,7 +57,7 @@ fn main() {
             })
             .collect();
 
-        run(audios);
+        run(audios, is_loop);
     }
 
     // -r option
@@ -71,7 +80,7 @@ fn main() {
             }
         };
 
-        run(audios);
+        run(audios, is_loop);
     }
 
     // devices subcommand
@@ -82,7 +91,7 @@ fn main() {
     }
 }
 
-fn run(audios: Vec<Audio>) {
+fn run(audios: Vec<Audio>, is_loop: bool) {
     let mut player = Player::new();
     let input_handler = InputHandler::new();
     let mut screen = Screen::new();
@@ -115,6 +124,11 @@ fn run(audios: Vec<Audio>) {
                 }
                 _ => (),
             }
+        }
+
+        if is_loop && player.is_empty() {
+            state.set_loaded_to_next();
+            player.load(state.loaded());
         }
 
         if !state.is_clean() {
