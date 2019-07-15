@@ -3,6 +3,7 @@ use play::{Audio, InputHandler, Player, State};
 use std::{fs, io, io::Write};
 use termion::event::Key;
 use termion::raw::IntoRawMode;
+use termion::color;
 
 const LOOP_SLEEP_MS: u64 = 50;
 
@@ -102,7 +103,9 @@ fn run(audios: Vec<Audio>, is_loop: bool) {
         for key in input_handler.keys() {
             match key {
                 Key::Char('q') => {
-                    write_line(&mut stdout, "Quitting...");
+                    let quit_msg = format!("{}Quitting...{}", color::Fg(color::Red), color::Fg(color::Reset));
+
+                    write_line(&mut stdout, &quit_msg);
                     return;
                 }
                 Key::Char(' ') => {
@@ -130,8 +133,9 @@ fn run(audios: Vec<Audio>, is_loop: bool) {
 
 fn write_audio(out: &mut Write, audio: &Audio, player: &Player) {
     let player_status = if player.is_paused() { "||" } else { "|>" };
+    let player_status = format!("{}{}{}", color::Fg(color::Green), player_status, color::Fg(color::Reset));
 
-    write_line(out, &format!("{} {}", player_status, audio.name()));
+    write_line(out, &format!("{} {}{}{}", player_status, color::Fg(color::Blue), audio.name(), color::Fg(color::Reset)));
 }
 
 fn write_line(out: &mut Write, msg: &str) {
