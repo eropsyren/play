@@ -1,8 +1,9 @@
-use clap::{self, App, Arg, SubCommand};
-use play::{Audio, InputHandler, Player, Screen, State};
-use rodio;
-use std::fs;
+use clap::{self, App, Arg};
+use play::{Audio, InputHandler, Player, State};
+use std::{fs, io, io::Write};
 use termion::event::Key;
+use termion::raw::IntoRawMode;
+use termion::color;
 
 const LOOP_SLEEP_MS: u64 = 50;
 
@@ -37,7 +38,6 @@ fn main() {
                 .help("automatically loops through all songs")
                 .takes_value(false),
         )
-        .subcommand(SubCommand::with_name("devices").about("list all available audio devices"))
         .get_matches();
 
     let is_loop = matches.is_present("loop");
@@ -82,63 +82,62 @@ fn main() {
 
         run(audios, is_loop);
     }
-
-    // devices subcommand
-    if let Some(_) = matches.subcommand_matches("devices") {
-        for device in rodio::devices() {
-            println!("name: {}", device.name());
-        }
-    }
 }
 
 fn run(audios: Vec<Audio>, is_loop: bool) {
-    let mut player = Player::new();
+    let player = Player::new();
+    let mut stdout = io::stdout()
+        .into_raw_mode()
+        .expect("unable to enter terminal raw mode");
     let input_handler = InputHandler::new();
-    let mut screen = Screen::new();
-    // Player defaults as paused
-    let mut state = State::new(audios, 0, 0, (screen.height() - 4) as usize, true);
+    let mut state = match State::new(audios) {
+        Some(state) => state,
+        None => return,
+    };
 
-    screen.clear();
-    screen.hide_cursor();
+    // append the first song
+    player.append(state.pointed());
+    write_audio(&mut stdout, state.pointed(), &player);
 
-    player.load(state.loaded());
-
-    'main: loop {
+    loop {
         for key in input_handler.keys() {
             match key {
                 Key::Char('q') => {
-                    screen.clear();
-                    break 'main;
+                    let quit_msg = format!("{}Quitting...{}", color::Fg(color::Red), color::Fg(color::Reset));
+
+                    write_line(&mut stdout, &quit_msg);
+                    return;
                 }
                 Key::Char(' ') => {
-                    if player.is_paused() {
-                        player.play();
-                        state.set_paused(false);
-                    } else {
-                        player.pause();
-                        state.set_paused(true);
-                    }
-                }
-                Key::Up => state.prev(),
-                Key::Down => state.next(),
-                Key::Char('\n') => {
-                    state.set_loaded_to_pointed();
-                    player.load(state.loaded());
+                    player.toggle();
+                    write_audio(&mut stdout, state.pointed(), &player);
                 }
                 _ => (),
             }
         }
 
-        if is_loop && player.is_empty() {
-            state.set_loaded_to_next();
-            player.load(state.loaded());
-        }
+        if player.is_empty() {
+            if !state.is_pointing_to_last() || (state.is_pointing_to_last() && is_loop) {
+                let audio = state.point_to_next().pointed();
 
-        if !state.is_clean() {
-            screen.render(&state);
-            state.clean();
+                write_audio(&mut stdout, audio, &player);
+                player.append(audio);
+            } else {
+                return;
+            }
         }
 
         std::thread::sleep(std::time::Duration::from_millis(LOOP_SLEEP_MS));
     }
+}
+
+fn write_audio(out: &mut Write, audio: &Audio, player: &Player) {
+    let player_status = if player.is_paused() { "||" } else { "|>" };
+    let player_status = format!("{}{}{}", color::Fg(color::Green), player_status, color::Fg(color::Reset));
+
+    write_line(out, &format!("{} {}{}{}", player_status, color::Fg(color::Blue), audio.name(), color::Fg(color::Reset)));
+}
+
+fn write_line(out: &mut Write, msg: &str) {
+    writeln!(out, "{}\r", msg).expect("error writing to stdout");
 }

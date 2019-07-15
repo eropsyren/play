@@ -1,20 +1,19 @@
 use crate::Audio;
-use rodio::{Device, Sink};
+use rodio::Sink;
 
 pub struct Player {
-    device: Device,
     sink: Sink,
 }
 
 impl Player {
     pub fn new() -> Self {
         let device =
-            rodio::default_output_device().expect("Error: unable to obtain default outut device");
+            rodio::default_output_device().expect("Error: unable to obtain default output device");
         let sink = Sink::new(&device);
 
         sink.pause();
 
-        Player { device, sink }
+        Player { sink }
     }
 
     pub fn is_empty(&self) -> bool {
@@ -25,27 +24,15 @@ impl Player {
         self.sink.is_paused()
     }
 
-    pub fn load(&mut self, audio: &Audio) {
-        if self.is_empty() {
-            self.sink.append(audio.source())
+    pub fn append(&self, audio: &Audio) {
+        self.sink.append(audio.source());
+    }
+
+    pub fn toggle(&self) {
+        if self.is_paused() {
+            self.sink.play();
         } else {
-            let is_paused = self.is_paused();
-
-            self.sink = Sink::new(&self.device);
-
-            if is_paused {
-                self.sink.pause();
-            }
-
-            self.sink.append(audio.source());
+            self.sink.pause();
         }
-    }
-
-    pub fn play(&self) {
-        self.sink.play();
-    }
-
-    pub fn pause(&self) {
-        self.sink.pause();
     }
 }
