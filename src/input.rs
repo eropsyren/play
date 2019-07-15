@@ -1,11 +1,7 @@
-use std::io;
 use std::sync::mpsc::{self, Receiver, TryIter};
-use std::thread;
-use std::time::Duration;
+use std::{io, thread};
 use termion::event::Key;
 use termion::input::TermRead;
-
-const INPUT_THREAD_SLEEP_MS: u64 = 50;
 
 pub struct InputHandler {
     keys_reciever: Receiver<Key>,
@@ -19,7 +15,7 @@ impl InputHandler {
         thread::spawn(move || {
             for key in stdin.keys() {
                 match key {
-                    Some(Ok(key)) => keys_sender.send(key).unwrap(),
+                    Ok(key) => keys_sender.send(key).unwrap(),
                     _ => (),
                 }
             }
