@@ -28,11 +28,11 @@ impl Player {
         self.sink.append(audio.source());
     }
 
-    pub fn play(&self) {
-        self.sink.play();
-    }
-
-    pub fn pause(&self) {
-        self.sink.pause();
+    pub fn toggle(&self) {
+        if self.is_paused() {
+            self.sink.play();
+        } else {
+            self.sink.pause();
+        }
     }
 }
